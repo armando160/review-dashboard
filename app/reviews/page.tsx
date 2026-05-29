@@ -56,7 +56,7 @@ export default function ReviewDrillDown() {
   return (
     <div className="flex flex-col min-h-full">
       <Header title="Review Drill-Down" description="Browse and filter individual reviews" />
-      <div className="flex-1 p-6 space-y-4">
+      <div className="flex-1 p-4 md:p-6 space-y-4">
         {/* In-page filter bar */}
         <div className="flex flex-wrap gap-6 p-4 rounded-lg bg-card border border-border text-sm">
           <div>

@@ -36,8 +36,8 @@ export default function ExecutiveOverview() {
   return (
     <div className="flex flex-col min-h-full">
       <Header title="Executive Overview" description="Portfolio-wide review performance" />
-      <div className="flex-1 p-6 space-y-6">
-        <div className="flex gap-4 flex-wrap">
+      <div className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           <KpiCard
             title="Total Reviews"
             value={kpis ? kpis.totalReviews.toLocaleString() : '—'}

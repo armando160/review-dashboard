@@ -45,7 +45,7 @@ export default function ProductAnalysis() {
   return (
     <div className="flex flex-col min-h-full">
       <Header title="Product Analysis" description="ASIN-level performance and rankings" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <ScatterPlot data={scatter} loading={loading} />
           <RatingHistogram data={distribution} loading={loading} />

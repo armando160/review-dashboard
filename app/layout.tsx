@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import { Poppins } from 'next/font/google'
 import './globals.css'
-import { Sidebar } from '@/components/layout/sidebar'
+import { AppShell } from '@/components/layout/app-shell'
 import { FiltersProvider } from '@/hooks/use-filters'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { MobileMenuProvider } from '@/hooks/use-mobile-menu'
 
 const poppins = Poppins({
   variable: '--font-poppins',
@@ -22,10 +23,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-background text-foreground antialiased">
         <FiltersProvider>
           <TooltipProvider>
-            <div className="flex min-h-screen">
-              <Sidebar />
-              <main className="flex-1 flex flex-col min-w-0">{children}</main>
-            </div>
+            <MobileMenuProvider>
+              <AppShell>{children}</AppShell>
+            </MobileMenuProvider>
           </TooltipProvider>
         </FiltersProvider>
       </body>

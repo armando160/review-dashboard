@@ -26,7 +26,7 @@ export function formatPct(value: number): string {
 export const BRAND_COLORS: Record<string, string> = {
   Lifepro: '#E0693D',
   Oaktiv: '#22c55e',
-  Petcove: '#f59e0b',
+  Petcove: '#3b82f6',
   Joyberri: '#ec4899',
   'Loft&Ivy': '#14b8a6',
   Sunello: '#f97316',

@@ -1,6 +1,7 @@
 'use client'
 
 import { useFilters } from '@/hooks/use-filters'
+import { useIsMobile } from '@/hooks/use-is-mobile'
 import { buttonVariants } from '@/components/ui/button'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -74,6 +75,7 @@ export function GlobalFilters() {
   const { filters, setDateRange, setBrands, setCategories, setSentiments, setRatings, resetFilters } =
     useFilters()
   const [calOpen, setCalOpen] = useState(false)
+  const isMobile = useIsMobile()
 
   const activeCount =
     filters.brands.length +
@@ -117,7 +119,7 @@ export function GlobalFilters() {
                 setCalOpen(false)
               }
             }}
-            numberOfMonths={2}
+            numberOfMonths={isMobile ? 1 : 2}
           />
         </PopoverContent>
       </Popover>

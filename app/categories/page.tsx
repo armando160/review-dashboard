@@ -29,7 +29,7 @@ export default function CategoryIntelligence() {
   return (
     <div className="flex flex-col min-h-full">
       <Header title="Category Intelligence" description="Sentiment breakdown by review category" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
         <CategoryBreakdown data={catSentiment} loading={loading} />
         <SentimentTrend data={catSentiment} periodData={[]} loading={loading} />
         <Heatmap data={heatmap} loading={loading} />
