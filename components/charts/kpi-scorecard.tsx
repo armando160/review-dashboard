@@ -1,8 +1,9 @@
 'use client'
 
 import { Card, CardContent } from '@/components/ui/card'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, Info } from 'lucide-react'
 
 interface KpiCardProps {
   title: string
@@ -13,6 +14,8 @@ interface KpiCardProps {
   loading?: boolean
   /** When true, a rising delta is bad (red) and a falling delta is good (green). Use for Negative Sentiment. */
   invertDelta?: boolean
+  /** Tooltip text shown on the ⓘ icon next to the title. Explain the calculation and filter effects. */
+  tooltip?: string
 }
 
 function DeltaBadge({
@@ -28,7 +31,6 @@ function DeltaBadge({
   const isZero = delta === 0
   const Icon = isZero ? Minus : isPositive ? TrendingUp : TrendingDown
 
-  // invert = true means up is bad (e.g. negative sentiment rising)
   const isGood = invert ? !isPositive : isPositive
   const colorClass = isZero
     ? 'text-muted-foreground'
@@ -58,14 +60,32 @@ export function KpiCard({
   icon,
   loading,
   invertDelta,
+  tooltip,
 }: KpiCardProps) {
   return (
     <Card className="flex-1 min-w-[160px]">
       <CardContent className="pt-4">
         <div className="flex items-start justify-between mb-2">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            {title}
-          </p>
+          <div className="flex items-center gap-1">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              {title}
+            </p>
+            {tooltip && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    className="text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                    aria-label={`About ${title}`}
+                  >
+                    <Info className="w-3 h-3" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="start" className="max-w-[280px] text-left leading-snug whitespace-pre-line">
+                  {tooltip}
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
           {icon && <span className="text-muted-foreground">{icon}</span>}
         </div>
         {loading ? (
