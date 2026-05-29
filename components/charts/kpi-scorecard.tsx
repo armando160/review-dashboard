@@ -72,13 +72,11 @@ export function KpiCard({
             </p>
             {tooltip && (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    className="text-muted-foreground/50 hover:text-muted-foreground transition-colors"
-                    aria-label={`About ${title}`}
-                  >
-                    <Info className="w-3 h-3" />
-                  </button>
+                <TooltipTrigger
+                  className="text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                  aria-label={`About ${title}`}
+                >
+                  <Info className="w-3 h-3" />
                 </TooltipTrigger>
                 <TooltipContent side="bottom" align="start" className="max-w-[280px] text-left leading-snug whitespace-pre-line">
                   {tooltip}
