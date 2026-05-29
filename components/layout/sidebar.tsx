@@ -1,0 +1,45 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
+import { BarChart3, TrendingUp, Package, MessageSquare } from 'lucide-react'
+
+const navItems = [
+  { href: '/', label: 'Executive Overview', icon: BarChart3 },
+  { href: '/categories', label: 'Category Intelligence', icon: TrendingUp },
+  { href: '/products', label: 'Product Analysis', icon: Package },
+  { href: '/reviews', label: 'Review Drill-Down', icon: MessageSquare },
+]
+
+export function Sidebar() {
+  const pathname = usePathname()
+
+  return (
+    <aside className="w-56 shrink-0 flex flex-col border-r border-border bg-card h-screen sticky top-0">
+      <div className="px-4 py-5 border-b border-border">
+        <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+          Chai Vision
+        </div>
+        <div className="text-base font-bold text-foreground mt-0.5">Review Analytics</div>
+      </div>
+      <nav className="flex-1 px-2 py-4 space-y-1">
+        {navItems.map(({ href, label, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className={cn(
+              'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+              pathname === href
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+            )}
+          >
+            <Icon className="w-4 h-4 shrink-0" />
+            {label}
+          </Link>
+        ))}
+      </nav>
+    </aside>
+  )
+}
