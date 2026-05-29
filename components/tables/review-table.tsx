@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { BRAND_COLORS, SENTIMENT_COLORS, downloadCsv } from '@/lib/utils'
+import { BRAND_COLORS, downloadCsv } from '@/lib/utils'
 import type { ReviewWithProduct } from '@/types'
 import { ChevronDown, ChevronUp, Download } from 'lucide-react'
 
@@ -17,7 +16,13 @@ interface Props {
 }
 
 function SentimentBadge({ sentiment }: { sentiment: string | null }) {
-  if (!sentiment) return <span className="text-muted-foreground text-xs">—</span>
+  if (!sentiment) {
+    return (
+      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground">
+        Not processed
+      </span>
+    )
+  }
   const color =
     sentiment === 'positive'
       ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
@@ -25,16 +30,33 @@ function SentimentBadge({ sentiment }: { sentiment: string | null }) {
       ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
       : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
   return (
-    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium capitalize ${color}`}>
+    <span
+      className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium capitalize ${color}`}
+    >
       {sentiment}
     </span>
   )
 }
 
+function CategoryCell({ category }: { category: string | null }) {
+  if (!category) {
+    return (
+      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground">
+        Not processed
+      </span>
+    )
+  }
+  return <span className="text-xs">{category}</span>
+}
+
 function StarRating({ rating }: { rating: number }) {
   const color =
     rating >= 4 ? 'text-green-600' : rating === 3 ? 'text-yellow-500' : 'text-red-500'
-  return <span className={`font-medium text-xs ${color}`}>{'★'.repeat(rating)}{'☆'.repeat(5 - rating)}</span>
+  return (
+    <span className={`font-medium text-xs ${color}`}>
+      {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
+    </span>
+  )
 }
 
 function ReviewRow({ review }: { review: ReviewWithProduct }) {
@@ -45,7 +67,10 @@ function ReviewRow({ review }: { review: ReviewWithProduct }) {
       <tr className="border-b border-border/50 hover:bg-muted/20 transition-colors">
         <td className="p-2">
           <div className="text-xs font-mono text-muted-foreground">{review.asin}</div>
-          <div className="text-xs truncate max-w-[150px]" title={review.product_name ?? undefined}>
+          <div
+            className="text-xs truncate max-w-[150px]"
+            title={review.product_name ?? undefined}
+          >
             {review.product_name ?? '—'}
           </div>
         </td>
@@ -63,7 +88,7 @@ function ReviewRow({ review }: { review: ReviewWithProduct }) {
           <StarRating rating={review.rating} />
         </td>
         <td className="p-2">
-          <span className="text-xs">{review.review_category ?? '—'}</span>
+          <CategoryCell category={review.review_category} />
         </td>
         <td className="p-2">
           <SentimentBadge sentiment={review.sentiment} />
@@ -75,22 +100,21 @@ function ReviewRow({ review }: { review: ReviewWithProduct }) {
         </td>
         <td className="p-2 text-xs text-muted-foreground whitespace-nowrap">
           {review.review_date
-            ? new Date(review.review_date).toLocaleDateString('en-US', {
-                month: 'short',
+            ? new Date(review.review_date + 'T12:00:00').toLocaleDateString('en-US', {
+                month: 'long',
                 day: 'numeric',
-                year: '2-digit',
+                year: 'numeric',
               })
             : '—'}
         </td>
         <td className="p-2">
-          <Button
-            variant="ghost"
-            size="icon-xs"
+          <button
             onClick={() => setExpanded(!expanded)}
             aria-label={expanded ? 'Collapse' : 'Expand'}
+            className="inline-flex items-center justify-center w-7 h-7 rounded bg-muted hover:bg-muted-foreground/20 border border-border text-foreground transition-colors"
           >
-            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          </Button>
+            {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
         </td>
       </tr>
       {expanded && (

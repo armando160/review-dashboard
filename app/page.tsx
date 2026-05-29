@@ -68,6 +68,7 @@ export default function ExecutiveOverview() {
             deltaLabel="pp"
             icon={<TrendingDown className="w-4 h-4" />}
             loading={loading}
+            invertDelta
           />
         </div>
         <VelocityTrend data={velocity} loading={loading} />
