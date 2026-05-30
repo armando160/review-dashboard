@@ -67,16 +67,16 @@ export function KpiCard({
       <CardContent className="pt-4">
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-1">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <p className="text-xs font-bold text-foreground uppercase tracking-wider">
               {title}
             </p>
             {tooltip && (
               <Tooltip>
                 <TooltipTrigger
-                  className="text-foreground/60 hover:text-foreground transition-colors"
+                  className="text-foreground/70 hover:text-foreground transition-colors"
                   aria-label={`About ${title}`}
                 >
-                  <Info className="w-3 h-3" />
+                  <Info className="w-3.5 h-3.5" />
                 </TooltipTrigger>
                 <TooltipContent side="bottom" align="start" className="max-w-[280px] text-left leading-snug whitespace-pre-line">
                   {tooltip}
