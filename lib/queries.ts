@@ -250,7 +250,8 @@ export async function fetchHeatmap(filters: Filters): Promise<HeatmapRow[]> {
 export async function fetchTopAsins(
   filters: Filters,
   order: 'asc' | 'desc' = 'desc',
-  limit = 10
+  limit = 10,
+  sortBy: 'rating' | 'volume' = 'rating'
 ): Promise<TopAsin[]> {
   const { dateFrom, dateTo, brands, asins, ratings } = filters
 
@@ -319,7 +320,13 @@ export async function fetchTopAsins(
 
   return result
     .sort((a, b) =>
-      order === 'desc' ? b.avg_rating - a.avg_rating : a.avg_rating - b.avg_rating
+      sortBy === 'volume'
+        ? order === 'desc'
+          ? b.review_count - a.review_count
+          : a.review_count - b.review_count
+        : order === 'desc'
+        ? b.avg_rating - a.avg_rating
+        : a.avg_rating - b.avg_rating
     )
     .slice(0, limit)
 }

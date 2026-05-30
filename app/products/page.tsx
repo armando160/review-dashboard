@@ -27,16 +27,16 @@ export default function ProductAnalysis() {
     Promise.all([
       fetchScatterData(filters),
       fetchRatingDistribution(filters),
-      fetchTopAsins(filters, 'desc', 10),
-      fetchTopAsins(filters, 'asc', 10),
-      fetchTopAsins(filters, 'desc', 10),
+      fetchTopAsins(filters, 'desc', 10, 'rating'),
+      fetchTopAsins(filters, 'asc', 10, 'rating'),
+      fetchTopAsins(filters, 'desc', 10, 'volume'),
     ])
       .then(([scatterData, distData, top, bottom, vol]) => {
         setScatter(scatterData)
         setDistribution(distData)
         setTopByRating(top)
         setBottomByRating(bottom)
-        setTopByVolume(vol.sort((a, b) => b.review_count - a.review_count))
+        setTopByVolume(vol)
       })
       .catch(console.error)
       .finally(() => setLoading(false))
