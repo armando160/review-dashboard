@@ -136,3 +136,48 @@ export interface ScrapeLogEntry {
   completed_at: string | null
   status: string
 }
+
+export interface IssueTheme {
+  id: number
+  theme_label: string
+  description: string | null
+  category: string
+  severity: string
+  asin: string
+  mention_count: number
+  first_seen: string | null
+  last_seen: string | null
+  status: string
+  created_at: string
+  product_name?: string | null
+  brand?: string | null
+  reviews?: Array<{
+    review_id: number
+    relevance: string | null
+    review: {
+      id: number
+      title: string | null
+      review_text: string | null
+      rating: number
+      review_date: string
+    }
+  }>
+}
+
+export interface ProductFacet {
+  id: number
+  asin: string
+  facet_name: string
+  facet_type: string
+  positive_count: number
+  negative_count: number
+  neutral_count: number
+  total_mentions: number
+  summary: string | null
+  representative_quotes: Array<{
+    review_id: number
+    quote: string
+    sentiment: string
+  }> | null
+  created_at: string
+}

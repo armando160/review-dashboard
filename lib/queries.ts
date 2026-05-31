@@ -10,6 +10,8 @@ import type {
   RatingDistributionRow,
   ReviewWithProduct,
   Product,
+  IssueTheme,
+  ProductFacet,
 } from '@/types'
 import { subDays } from 'date-fns'
 
@@ -461,4 +463,81 @@ export async function fetchLastScrapeDate(): Promise<string | null> {
     .limit(1)
     .single()
   return data?.completed_at ?? null
+}
+
+// ─── Issue Themes (Review Intelligence) ──────────────────────────────────────
+
+export async function fetchIssueThemes(filters: {
+  brands?: string[]
+  severity?: string[]
+  category?: string[]
+  status?: string
+  sortBy?: 'mentions' | 'severity' | 'newest'
+}): Promise<IssueTheme[]> {
+  let q = supabase
+    .from('issue_themes')
+    .select(`
+      *,
+      products!inner(product_name, brand),
+      issue_theme_reviews(
+        review_id,
+        relevance,
+        reviews(id, title, review_text, rating, review_date)
+      )
+    `)
+    .eq('status', filters.status ?? 'active')
+
+  if (filters.severity?.length) q = q.in('severity', filters.severity)
+  if (filters.category?.length) q = q.in('category', filters.category)
+  if (filters.brands?.length) q = q.in('products.brand', filters.brands)
+
+  if (filters.sortBy === 'newest') q = q.order('created_at', { ascending: false })
+  else q = q.order('mention_count', { ascending: false })
+
+  const { data } = await q
+
+  return ((data ?? []) as unknown as Array<any>).map((row: any) => ({
+    ...row,
+    product_name: row.products?.product_name ?? null,
+    brand: row.products?.brand ?? null,
+    reviews: (row.issue_theme_reviews ?? []).map((itr: any) => ({
+      review_id: itr.review_id,
+      relevance: itr.relevance,
+      review: itr.reviews,
+    })),
+  }))
+}
+
+export async function fetchIssueThemeStats(): Promise<{
+  activeCount: number
+  criticalCount: number
+  productsAffected: number
+  newThisMonth: number
+}> {
+  const { data: all } = await supabase
+    .from('issue_themes')
+    .select('id, severity, asin, created_at, status')
+
+  const rows = (all ?? []) as Array<{ id: number; severity: string; asin: string; created_at: string; status: string }>
+  const active = rows.filter(r => r.status === 'active')
+  const now = new Date()
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+
+  return {
+    activeCount: active.length,
+    criticalCount: active.filter(r => r.severity === 'critical').length,
+    productsAffected: new Set(active.map(r => r.asin)).size,
+    newThisMonth: active.filter(r => r.created_at >= monthStart).length,
+  }
+}
+
+// ─── Product Facets (Review Intelligence) ────────────────────────────────────
+
+export async function fetchProductFacets(asin: string): Promise<ProductFacet[]> {
+  const { data } = await supabase
+    .from('product_facets')
+    .select('*')
+    .eq('asin', asin)
+    .order('total_mentions', { ascending: false })
+  return (data ?? []) as ProductFacet[]
 }
