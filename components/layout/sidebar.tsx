@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { BarChart3, TrendingUp, Package, MessageSquare, BookOpen, X } from 'lucide-react'
+import { BarChart3, TrendingUp, Package, MessageSquare, Lightbulb, BookOpen, Activity, X } from 'lucide-react'
 import { useMobileMenu } from '@/hooks/use-mobile-menu'
 
 const navItems = [
@@ -11,6 +11,8 @@ const navItems = [
   { href: '/categories', label: 'Category Intelligence', icon: TrendingUp },
   { href: '/products', label: 'Product Analysis', icon: Package },
   { href: '/reviews', label: 'Review Drill-Down', icon: MessageSquare },
+  { href: '/intelligence', label: 'Review Intelligence', icon: Lightbulb },
+  { href: '/health', label: 'Data Health', icon: Activity },
   { href: '/guidelines', label: 'Guidelines', icon: BookOpen },
 ]
 
