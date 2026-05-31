@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Header } from '@/components/layout/header'
 import { Card, CardContent } from '@/components/ui/card'
-import { BRAND_COLORS } from '@/lib/utils'
+import { BRAND_COLORS, ALL_BRANDS } from '@/lib/utils'
 import {
   fetchPortfolioSnapshots,
   fetchProductDrilldown,
@@ -126,11 +126,11 @@ function ProductCard({ s, onClick }: { s: ProductSnapshot; onClick: () => void }
               {s.negative_pct}% neg
             </span>
             <span className="text-xs text-muted-foreground">
-              {s.negative_count.toLocaleString()} of {s.classified.toLocaleString()} classified
+              {s.negative_count.toLocaleString()} of {s.classified.toLocaleString()} analyzed
             </span>
           </>
         ) : (
-          <span className="text-xs text-muted-foreground italic">Not yet classified</span>
+          <span className="text-xs text-muted-foreground italic">Not yet analyzed</span>
         )}
       </div>
 
@@ -191,9 +191,9 @@ function CategoryCard({ stat, totalNeg }: { stat: CategoryStat; totalNeg: number
         {stat.sampleQuotes.length > 0 && (
           <div className="border-t border-border pt-3 space-y-2">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-              Sample complaints
+              Complaints ({stat.sampleQuotes.length})
             </p>
-            {stat.sampleQuotes.slice(0, expanded ? undefined : 2).map(q => (
+            {stat.sampleQuotes.slice(0, expanded ? undefined : 3).map(q => (
               <div key={q.id} className="p-2.5 bg-muted/40 rounded-md space-y-1">
                 <div className="flex items-center gap-1.5">
                   <Stars rating={q.rating} />
@@ -205,13 +205,13 @@ function CategoryCard({ stat, totalNeg }: { stat: CategoryStat; totalNeg: number
                 }
               </div>
             ))}
-            {stat.sampleQuotes.length > 2 && (
+            {stat.sampleQuotes.length > 3 && (
               <button
                 onClick={() => setExpanded(e => !e)}
                 className="flex items-center gap-1 text-xs text-primary hover:underline"
               >
                 {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                {expanded ? 'Show less' : `+${stat.sampleQuotes.length - 2} more`}
+                {expanded ? 'Show fewer' : `View all ${stat.sampleQuotes.length} reviews`}
               </button>
             )}
           </div>
@@ -321,12 +321,17 @@ function TrendChart({ trend }: { trend: MonthlyNeg[] }) {
 // ── AI analysis panel ─────────────────────────────────────────────────────────
 
 function AiPanel({ snapshot, negatives }: { snapshot: ProductSnapshot; negatives: NegativeReview[] }) {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error' | 'no-key'>('idle')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error' | 'no-key' | 'no-credits'>('idle')
   const [themes, setThemes] = useState<AnalysisTheme[]>([])
   const [errMsg, setErrMsg] = useState('')
+  const [analyzedCount, setAnalyzedCount] = useState(0)
+
+  const reviewsToSend = negatives.slice(0, 60)
+  const hasEnoughReviews = reviewsToSend.length >= 5
 
   async function run() {
     setStatus('loading')
+    setAnalyzedCount(reviewsToSend.length)
     try {
       const res = await fetch('/api/analyze', {
         method: 'POST',
@@ -334,7 +339,7 @@ function AiPanel({ snapshot, negatives }: { snapshot: ProductSnapshot; negatives
         body: JSON.stringify({
           asin: snapshot.asin,
           productName: snapshot.product_name ?? snapshot.asin,
-          reviews: negatives.slice(0, 60).map(r => ({
+          reviews: reviewsToSend.map(r => ({
             id: r.id,
             text: r.review_text,
             rating: r.rating,
@@ -346,18 +351,22 @@ function AiPanel({ snapshot, negatives }: { snapshot: ProductSnapshot; negatives
       const data = await res.json()
       if (!res.ok) {
         if (res.status === 503) { setStatus('no-key'); return }
-        setErrMsg(data.error ?? 'Unknown error'); setStatus('error'); return
+        if (res.status === 402) { setStatus('no-credits'); return }
+        setErrMsg(data.error ?? 'Unknown error')
+        setStatus('error')
+        return
       }
       setThemes(data.themes ?? [])
       setStatus('done')
     } catch (e) {
-      setErrMsg(String(e)); setStatus('error')
+      setErrMsg(e instanceof Error ? e.message : String(e))
+      setStatus('error')
     }
   }
 
   const sev = (s: string) =>
-    s === 'high'   ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'
-    : s === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300'
+    s === 'high'   ? 'bg-red-100 text-red-700'
+    : s === 'medium' ? 'bg-yellow-100 text-yellow-700'
     : 'bg-muted text-muted-foreground'
 
   return (
@@ -367,12 +376,27 @@ function AiPanel({ snapshot, negatives }: { snapshot: ProductSnapshot; negatives
       </h2>
       <Card>
         <CardContent className="pt-4">
-          {status === 'idle' && (
+
+          {/* Not enough reviews */}
+          {!hasEnoughReviews && (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 border border-border">
+              <AlertTriangle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+              <div className="text-sm space-y-1">
+                <p className="font-medium">Not enough data</p>
+                <p className="text-xs text-muted-foreground">
+                  AI analysis needs at least 5 negative reviews to identify patterns.
+                  This product has {reviewsToSend.length} — check back once more reviews have been analyzed.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {hasEnoughReviews && status === 'idle' && (
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
               <div className="flex-1">
-                <p className="text-sm font-medium">Identify specific complaint patterns with AI</p>
+                <p className="text-sm font-medium">Find specific complaint patterns with AI</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Sends up to 60 recent negative reviews to Claude — surfaces specific issues beyond broad categories.
+                  Sends {reviewsToSend.length} negative reviews to Claude and surfaces specific recurring issues — more granular than the category breakdown above.
                 </p>
               </div>
               <button
@@ -388,34 +412,63 @@ function AiPanel({ snapshot, negatives }: { snapshot: ProductSnapshot; negatives
           {status === 'loading' && (
             <div className="flex items-center gap-3 py-2">
               <RefreshCw className="w-4 h-4 animate-spin text-primary" />
-              <span className="text-sm text-muted-foreground">Analyzing reviews — ~10 seconds…</span>
+              <span className="text-sm text-muted-foreground">
+                Analyzing {analyzedCount} reviews — this takes about 10–20 seconds…
+              </span>
             </div>
           )}
 
           {status === 'no-key' && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 border border-border">
-              <AlertTriangle className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <div className="text-sm space-y-1">
-                <p className="font-medium">AI analysis not configured</p>
-                <p className="text-xs text-muted-foreground">
-                  Add{' '}<code className="bg-muted px-1 rounded">ANTHROPIC_API_KEY</code>{' '}
-                  or{' '}<code className="bg-muted px-1 rounded">OPENROUTER_API_KEY</code>{' '}
-                  to your Vercel environment variables and redeploy.
+                <p className="font-medium text-amber-800">AI not configured</p>
+                <p className="text-xs text-amber-700">
+                  Add <code className="bg-amber-100 px-1 rounded">OPENROUTER_API_KEY</code> to your environment variables and redeploy.
                 </p>
               </div>
             </div>
           )}
 
+          {status === 'no-credits' && (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+              <div className="text-sm space-y-1">
+                <p className="font-medium text-red-800">Out of AI credits</p>
+                <p className="text-xs text-red-700">
+                  Your OpenRouter balance is depleted. Top up at openrouter.ai to continue.
+                </p>
+                <button onClick={() => setStatus('idle')} className="text-xs text-red-600 underline mt-1">
+                  Try again
+                </button>
+              </div>
+            </div>
+          )}
+
           {status === 'error' && (
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-xs text-red-700 dark:text-red-300">
-              <p className="font-medium">Analysis failed: {errMsg}</p>
-              <button onClick={() => setStatus('idle')} className="mt-1 underline">Try again</button>
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+              <div className="text-sm space-y-1">
+                <p className="font-medium text-red-800">Analysis failed</p>
+                <p className="text-xs text-red-700">{errMsg || 'An unexpected error occurred. Please try again.'}</p>
+                <button onClick={() => setStatus('idle')} className="text-xs text-red-600 underline mt-1">
+                  Try again
+                </button>
+              </div>
             </div>
           )}
 
           {status === 'done' && (
             <div className="space-y-3">
-              <p className="text-xs text-muted-foreground">{themes.length} complaint themes found</p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  {themes.length} complaint pattern{themes.length !== 1 ? 's' : ''} found
+                  <span className="ml-1">· based on {analyzedCount} reviews</span>
+                </p>
+                <button onClick={() => { setStatus('idle'); setThemes([]) }} className="text-xs text-muted-foreground hover:text-foreground underline">
+                  Re-run
+                </button>
+              </div>
               {themes.map((t, i) => (
                 <div key={i} className="p-3 rounded-lg border border-border bg-muted/20 space-y-2">
                   <div className="flex items-start justify-between gap-2">
@@ -435,11 +488,9 @@ function AiPanel({ snapshot, negatives }: { snapshot: ProductSnapshot; negatives
                   )}
                 </div>
               ))}
-              <button onClick={() => { setStatus('idle'); setThemes([]) }} className="text-xs text-muted-foreground hover:text-foreground underline">
-                Re-run
-              </button>
             </div>
           )}
+
         </CardContent>
       </Card>
     </section>
@@ -512,17 +563,17 @@ function DrilldownView({ snapshot, onBack }: { snapshot: ProductSnapshot; onBack
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           {
-            label: 'Classified',
+            label: 'Analyzed',
             value: snapshot.classified.toLocaleString(),
             sub: snapshot.total_reviews > 0
               ? `${Math.round((snapshot.classified / snapshot.total_reviews) * 100)}% of ${snapshot.total_reviews.toLocaleString()} Amazon reviews`
-              : 'total classified reviews',
+              : 'total analyzed reviews',
             accent: '',
           },
           {
             label: 'Negative',
             value: snapshot.negative_count.toLocaleString(),
-            sub: `${snapshot.negative_pct}% of classified`,
+            sub: `${snapshot.negative_pct}% of analyzed`,
             accent: snapshot.negative_pct >= 30
               ? 'text-red-500'
               : snapshot.negative_pct >= 18 ? 'text-yellow-600' : 'text-green-600',
@@ -566,8 +617,8 @@ function DrilldownView({ snapshot, onBack }: { snapshot: ProductSnapshot; onBack
         <Card>
           <CardContent className="pt-4 text-sm text-muted-foreground">
             {snapshot.classified === 0
-              ? 'No reviews processed through the LLM pipeline yet for this product.'
-              : 'No negative reviews found among classified reviews.'}
+              ? 'No reviews have been analyzed for this product yet.'
+              : 'No negative reviews found among analyzed reviews.'}
           </CardContent>
         </Card>
       )}
@@ -582,6 +633,11 @@ function DrilldownView({ snapshot, onBack }: { snapshot: ProductSnapshot; onBack
             </CardContent>
           </Card>
         </section>
+      )}
+
+      {/* AI panel — above recent reviews so it's not missed */}
+      {!loading && drilldown && (
+        <AiPanel snapshot={snapshot} negatives={drilldown.recentNegatives} />
       )}
 
       {/* Recent negatives table */}
@@ -630,11 +686,6 @@ function DrilldownView({ snapshot, onBack }: { snapshot: ProductSnapshot; onBack
           </Card>
         </section>
       )}
-
-      {/* AI panel */}
-      {!loading && drilldown && drilldown.recentNegatives.length >= 5 && (
-        <AiPanel snapshot={snapshot} negatives={drilldown.recentNegatives} />
-      )}
     </div>
   )
 }
@@ -660,7 +711,9 @@ export default function IntelligencePage() {
   }, [])
 
   const brands = useMemo(
-    () => Array.from(new Set(snapshots.map(s => s.brand).filter(Boolean) as string[])).sort(),
+    () => Array.from(new Set(
+      snapshots.map(s => s.brand).filter((b): b is string => !!b && ALL_BRANDS.includes(b))
+    )).sort(),
     [snapshots]
   )
 
@@ -736,18 +789,24 @@ export default function IntelligencePage() {
           >
             All brands
           </button>
-          {brands.map(b => (
-            <button
-              key={b}
-              onClick={() => setBrand(brand === b ? null : b)}
-              className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
-                brand === b ? 'text-white border-transparent' : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
-              }`}
-              style={brand === b ? { background: BRAND_COLORS[b] ?? '#888' } : undefined}
-            >
-              {b}
-            </button>
-          ))}
+          {brands.map(b => {
+            const color = BRAND_COLORS[b] ?? '#888'
+            const active = brand === b
+            return (
+              <button
+                key={b}
+                onClick={() => setBrand(active ? null : b)}
+                className="text-xs px-3 py-1 rounded-full border font-medium transition-all flex items-center gap-1.5"
+                style={{
+                  borderColor: color,
+                  backgroundColor: active ? color : `${color}18`,
+                  color: active ? 'white' : color,
+                }}
+              >
+                {b}
+              </button>
+            )
+          })}
           <div className="ml-auto flex items-center gap-1.5">
             {(['complaints', 'risk', 'least-data'] as SortKey[]).map(k => (
               <button
@@ -774,12 +833,12 @@ export default function IntelligencePage() {
             </span>
             {noDataCount > 0 && !showAll && (
               <button onClick={() => setShowAll(true)} className="underline hover:text-foreground">
-                +{noDataCount} without classified reviews (show)
+                +{noDataCount} without analyzed reviews (show)
               </button>
             )}
             {showAll && noDataCount > 0 && (
               <button onClick={() => setShowAll(false)} className="underline hover:text-foreground">
-                Hide {noDataCount} unclassified
+                Hide {noDataCount} not yet analyzed
               </button>
             )}
           </div>

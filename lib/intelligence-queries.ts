@@ -228,8 +228,8 @@ export async function fetchProductDrilldown(asin: string): Promise<{
       total: catTotal,
       negativePct: catTotal > 0 ? Math.round((b.neg.length / catTotal) * 1000) / 10 : 0,
       shareOfAllNeg: totalNeg > 0 ? Math.round((b.neg.length / totalNeg) * 1000) / 10 : 0,
-      // Pick 3 most recent negative reviews as sample quotes
-      sampleQuotes: b.neg.slice(0, 3).map(r => ({
+      // All negative reviews for this category (used for full expansion in UI)
+      sampleQuotes: b.neg.map(r => ({
         id: r.id,
         text: r.review_text,
         rating: r.rating,
@@ -245,7 +245,7 @@ export async function fetchProductDrilldown(asin: string): Promise<{
 
   const recentNegatives = rows
     .filter(r => r.sentiment === 'negative')
-    .slice(0, 20)
+    .slice(0, 60)
 
   return { categories, trend, recentNegatives }
 }
