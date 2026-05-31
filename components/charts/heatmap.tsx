@@ -81,7 +81,7 @@ export function Heatmap({ data, loading }: Props) {
             </table>
             {data.length === 0 && (
               <p className="text-center text-muted-foreground text-sm py-8">
-                No classified reviews in selected period
+                No analyzed reviews in selected period
               </p>
             )}
           </div>

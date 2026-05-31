@@ -47,7 +47,7 @@ export default function GuidelinesPage() {
             </Rule>
             <Rule label="Confidence threshold">
               A classification is accepted only if the model returns a confidence score ≥ 0.60 (60%).
-              Results below this threshold are treated as unclassified and may be retried by the
+              Results below this threshold are treated as unanalyzed and may be retried by the
               next provider.
             </Rule>
             <Rule label="Sentiment labels">
@@ -57,13 +57,13 @@ export default function GuidelinesPage() {
             </Rule>
             <Rule label="What the model reads">
               The review <em>title</em> and <em>body text</em> only. Star rating is not fed to
-              the model — a 5-star review can be classified negative if the text is critical, and
+              the model — a 5-star review can be analyzed as negative if the text is critical, and
               vice-versa.
             </Rule>
             <Rule label="Not processed">
-              Reviews with a blank Category or Sentiment column have not yet been through the LLM
+              Reviews with a blank Category or Sentiment column have not yet been analyzed by the
               pipeline. This is normal during the initial backlog phase. All reviews will be
-              classified within a few days as the pipeline cycles through them.
+              analyzed within a few days as the pipeline cycles through them.
             </Rule>
           </div>
         </Section>
@@ -115,7 +115,7 @@ export default function GuidelinesPage() {
               weighted by product volume.
             </Rule>
             <Rule label="Positive Sentiment %">
-              Of all classified reviews in the range, the percentage labelled positive. Reviews
+              Of all analyzed reviews in the range, the percentage labelled positive. Reviews
               still showing "Not processed" are excluded from this calculation.
             </Rule>
             <Rule label="Negative Sentiment %">

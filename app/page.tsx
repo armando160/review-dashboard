@@ -72,7 +72,7 @@ export default function ExecutiveOverview() {
             icon={<TrendingUp className="w-4 h-4" />}
             loading={loading}
             tooltip={
-              "% of LLM-classified reviews labeled positive, out of all classified reviews in the period.\n\n" +
+              "% of analyzed reviews labeled positive, out of all analyzed reviews in the period.\n\n" +
               "Reviews still showing 'Not processed' are excluded — they have not yet been through the AI pipeline.\n\n" +
               "Delta: percentage-point change vs. the prior equal period.\n\n" +
               "Affected by: Date range, Brand filter, Star Rating filter."
@@ -87,7 +87,7 @@ export default function ExecutiveOverview() {
             loading={loading}
             invertDelta
             tooltip={
-              "% of LLM-classified reviews labeled negative, out of all classified reviews in the period.\n\n" +
+              "% of analyzed reviews labeled negative, out of all analyzed reviews in the period.\n\n" +
               "The delta badge is red when this number rises and green when it falls — an increase in negative sentiment is a warning signal.\n\n" +
               "Reviews still showing 'Not processed' are excluded.\n\n" +
               "Affected by: Date range, Brand filter, Star Rating filter."

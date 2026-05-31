@@ -326,8 +326,14 @@ function AiPanel({ snapshot, negatives }: { snapshot: ProductSnapshot; negatives
   const [errMsg, setErrMsg] = useState('')
   const [analyzedCount, setAnalyzedCount] = useState(0)
 
-  const reviewsToSend = negatives.slice(0, 60)
-  const hasEnoughReviews = reviewsToSend.length >= 5
+  const maxReviews = negatives.length
+  const [reviewLimit, setReviewLimit] = useState(() => Math.min(60, maxReviews))
+  const reviewsToSend = negatives.slice(0, reviewLimit)
+  const hasEnoughReviews = maxReviews >= 5
+
+  // Cost estimate: claude-3.5-haiku via OpenRouter
+  // ~200 tokens/review input, ~2000 tokens output
+  const estimatedCost = ((reviewLimit * 200) / 1_000_000 * 0.80) + (2000 / 1_000_000 * 4.00)
 
   async function run() {
     setStatus('loading')
@@ -392,19 +398,55 @@ function AiPanel({ snapshot, negatives }: { snapshot: ProductSnapshot; negatives
           )}
 
           {hasEnoughReviews && status === 'idle' && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <div className="flex-1">
+            <div className="space-y-4">
+              <div>
                 <p className="text-sm font-medium">Find specific complaint patterns with AI</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Sends {reviewsToSend.length} negative reviews to Claude and surfaces specific recurring issues — more granular than the category breakdown above.
+                  Sends negative reviews to Claude and surfaces specific recurring issues — more granular than the category breakdown above.
                 </p>
               </div>
+
+              {/* Review count selector */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Reviews to analyze</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">{reviewLimit}</span>
+                    <span className="text-muted-foreground">of {maxReviews} available</span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="font-medium text-foreground">≈ ${estimatedCost.toFixed(3)}</span>
+                    <span className="text-muted-foreground text-[10px]">(est.)</span>
+                  </div>
+                </div>
+                {maxReviews > 60 ? (
+                  <input
+                    type="range"
+                    min={5}
+                    max={maxReviews}
+                    step={5}
+                    value={reviewLimit}
+                    onChange={e => setReviewLimit(Number(e.target.value))}
+                    className="w-full accent-primary"
+                  />
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">
+                    All {maxReviews} available reviews will be sent.
+                  </p>
+                )}
+                {maxReviews > 60 && (
+                  <div className="flex justify-between text-[10px] text-muted-foreground">
+                    <span>5 (fastest · cheapest)</span>
+                    <span>{maxReviews} (most complete)</span>
+                  </div>
+                )}
+              </div>
+
               <button
                 onClick={run}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shrink-0"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
               >
                 <Sparkles className="w-4 h-4" />
-                Analyze with AI
+                Analyze {reviewLimit} reviews
               </button>
             </div>
           )}
@@ -436,7 +478,7 @@ function AiPanel({ snapshot, negatives }: { snapshot: ProductSnapshot; negatives
               <div className="text-sm space-y-1">
                 <p className="font-medium text-red-800">Out of AI credits</p>
                 <p className="text-xs text-red-700">
-                  Your OpenRouter balance is depleted. Top up at openrouter.ai to continue.
+                  Please notify Armando Rivas to top up the OpenRouter balance before retrying.
                 </p>
                 <button onClick={() => setStatus('idle')} className="text-xs text-red-600 underline mt-1">
                   Try again
@@ -877,7 +919,7 @@ export default function IntelligencePage() {
               { label: '≥ 30% negative', cls: 'border-red-500' },
               { label: '18–29% negative', cls: 'border-yellow-500' },
               { label: '< 18% negative', cls: 'border-green-500' },
-              { label: 'Not classified', cls: 'border-border' },
+              { label: 'Not yet analyzed', cls: 'border-border' },
             ].map(({ label, cls }) => (
               <span key={label} className="flex items-center gap-1.5">
                 <span className={`w-4 h-4 border-2 ${cls} rounded-sm`} />

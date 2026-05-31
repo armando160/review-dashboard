@@ -202,11 +202,11 @@ export default function DataHealthPage() {
               <StatCard
                 label="Total Reviews"
                 value={fmt(stats.reviews.total)}
-                sub={`${fmt(stats.reviews.classified)} classified`}
+                sub={`${fmt(stats.reviews.classified)} analyzed`}
                 icon={Database}
               />
               <StatCard
-                label="Classified"
+                label="Analyzed"
                 value={`${classifiedPct}%`}
                 sub={`${fmt(stats.reviews.unclassified)} remaining`}
                 icon={CheckCircle}
@@ -231,19 +231,19 @@ export default function DataHealthPage() {
 
         {/* ── Classification health ──────────────────────────────────────── */}
         <section className="space-y-3">
-          <SectionTitle>Classification Health</SectionTitle>
+          <SectionTitle>Analysis Health</SectionTitle>
           {loading ? <Skeleton /> : stats && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               {/* Progress */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">LLM Classification Progress</CardTitle>
+                  <CardTitle className="text-sm font-medium">Analysis Progress</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <div className="flex justify-between text-sm mb-2">
-                      <span className="font-semibold">{fmt(stats.reviews.classified)} classified</span>
+                      <span className="font-semibold">{fmt(stats.reviews.classified)} analyzed</span>
                       <span className="text-muted-foreground">{fmt(stats.reviews.total)} total</span>
                     </div>
                     <ProgressBar
@@ -256,7 +256,7 @@ export default function DataHealthPage() {
 
                   {stats.reviews.unclassified > 0 ? (
                     <div className="p-3 rounded-lg bg-muted/50 border border-border text-xs space-y-1">
-                      <p className="font-medium">{fmt(stats.reviews.unclassified)} reviews pending classification</p>
+                      <p className="font-medium">{fmt(stats.reviews.unclassified)} reviews pending analysis</p>
                       <p className="text-muted-foreground">
                         At ~2,000/day (500 per run × 4 runs) — estimated{' '}
                         <span className="font-semibold text-foreground">
@@ -268,7 +268,7 @@ export default function DataHealthPage() {
                     </div>
                   ) : (
                     <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-xs text-green-700 dark:text-green-300 font-medium">
-                      ✓ All reviews classified — no backlog
+                      ✓ All reviews analyzed — no backlog
                     </div>
                   )}
 
@@ -289,7 +289,7 @@ export default function DataHealthPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium">Sentiment Breakdown</CardTitle>
-                  <p className="text-xs text-muted-foreground">Classified reviews only</p>
+                  <p className="text-xs text-muted-foreground">Analyzed reviews only</p>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {[
