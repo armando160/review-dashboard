@@ -164,7 +164,7 @@ export default function DataHealthPage() {
 
   return (
     <div className="flex flex-col min-h-full">
-      <Header title="Data Health" description="Pipeline status, scraping coverage, and classification progress" />
+      <Header title="Data Health" description="Pipeline status, scraping coverage, and analysis progress" showFilters={false} />
       <div className="flex-1 p-4 md:p-6 space-y-8">
 
         {/* Refresh bar */}

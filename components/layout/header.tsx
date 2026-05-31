@@ -8,14 +8,15 @@ import { Menu } from 'lucide-react'
 interface HeaderProps {
   title: string
   description?: string
+  showFilters?: boolean
 }
 
-export function Header({ title, description }: HeaderProps) {
+export function Header({ title, description, showFilters = true }: HeaderProps) {
   const { open } = useMobileMenu()
 
   return (
     <div className="border-b border-border bg-card px-4 md:px-6 py-4">
-      <div className="flex items-start justify-between gap-3 mb-3">
+      <div className={`flex items-start justify-between gap-3 ${showFilters ? 'mb-3' : ''}`}>
         <div className="flex items-center gap-3 min-w-0">
           {/* Hamburger — mobile only */}
           <button
@@ -36,11 +37,13 @@ export function Header({ title, description }: HeaderProps) {
             )}
           </div>
         </div>
-        <div className="shrink-0">
-          <GranularityToggle />
-        </div>
+        {showFilters && (
+          <div className="shrink-0">
+            <GranularityToggle />
+          </div>
+        )}
       </div>
-      <GlobalFilters />
+      {showFilters && <GlobalFilters />}
     </div>
   )
 }
