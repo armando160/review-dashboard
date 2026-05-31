@@ -224,57 +224,97 @@ function CategoryCard({ stat, totalNeg }: { stat: CategoryStat; totalNeg: number
 // ── Monthly trend chart ────────────────────────────────────────────────────────
 
 function TrendChart({ trend }: { trend: MonthlyNeg[] }) {
+  const [hiddenCats, setHiddenCats] = useState<Set<string>>(new Set())
+
+  const toggleCat = (cat: string) =>
+    setHiddenCats(prev => {
+      const next = new Set(prev)
+      next.has(cat) ? next.delete(cat) : next.add(cat)
+      return next
+    })
+
   if (trend.length === 0) return null
   const cats = Array.from(
     new Set(trend.flatMap(d => Object.keys(d).filter(k => k !== 'month')))
   ).sort()
 
+  const visibleCats = cats.filter(c => !hiddenCats.has(c))
+
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <BarChart data={trend} margin={{ top: 4, right: 8, left: -16, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-        <XAxis
-          dataKey="month"
-          tickFormatter={fmtMonth}
-          tick={{ fontSize: 11 }}
-          stroke="hsl(var(--muted-foreground))"
-        />
-        <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-        <RechartsTooltip
-          content={({ active, payload, label }) => {
-            if (!active || !payload?.length) return null
-            return (
-              <div style={{
-                background: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: 6,
-                fontSize: 12,
-                padding: '8px 12px',
-              }}>
-                <p style={{ marginBottom: 4, fontWeight: 600 }}>
-                  {typeof label === 'string' ? fmtMonth(label) : String(label)}
-                </p>
-                {payload.map((p, i) => (
-                  <p key={i} style={{ color: p.color, margin: '2px 0' }}>
-                    {p.name}: {p.value}
-                  </p>
-                ))}
-              </div>
-            )
-          }}
-        />
-        <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconType="square" iconSize={8} />
-        {cats.map((cat, idx) => (
-          <Bar
-            key={cat}
-            dataKey={cat}
-            stackId="a"
-            fill={catColor(cat)}
-            radius={idx === cats.length - 1 ? [2, 2, 0, 0] : [0, 0, 0, 0]}
+    <div className="space-y-3">
+      <ResponsiveContainer width="100%" height={220}>
+        <BarChart data={trend} margin={{ top: 4, right: 8, left: -16, bottom: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+          <XAxis
+            dataKey="month"
+            tickFormatter={fmtMonth}
+            tick={{ fontSize: 11 }}
           />
-        ))}
-      </BarChart>
-    </ResponsiveContainer>
+          <YAxis tick={{ fontSize: 11 }} />
+          <RechartsTooltip
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null
+              return (
+                <div style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 6,
+                  fontSize: 12,
+                  padding: '8px 12px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                }}>
+                  <p style={{ marginBottom: 4, fontWeight: 600, color: '#0f172a' }}>
+                    {typeof label === 'string' ? fmtMonth(label) : String(label)}
+                  </p>
+                  {payload.map((p, i) => (
+                    <p key={i} style={{ color: p.color, margin: '2px 0' }}>
+                      {p.name}: {p.value}
+                    </p>
+                  ))}
+                </div>
+              )
+            }}
+          />
+          {cats.map((cat, idx) =>
+            hiddenCats.has(cat) ? null : (
+              <Bar
+                key={cat}
+                dataKey={cat}
+                stackId="a"
+                fill={catColor(cat)}
+                radius={idx === visibleCats.length - 1 ? [2, 2, 0, 0] : [0, 0, 0, 0]}
+              />
+            )
+          )}
+        </BarChart>
+      </ResponsiveContainer>
+
+      {/* Toggleable category pills */}
+      <div className="flex flex-wrap justify-center gap-1.5">
+        {cats.map(cat => {
+          const color = catColor(cat)
+          const hidden = hiddenCats.has(cat)
+          return (
+            <button
+              key={cat}
+              onClick={() => toggleCat(cat)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+              style={{
+                borderColor: hidden ? '#e2e8f0' : color,
+                backgroundColor: hidden ? 'transparent' : `${color}22`,
+                color: hidden ? '#94a3b8' : color,
+              }}
+            >
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ backgroundColor: hidden ? '#cbd5e1' : color }}
+              />
+              {cat}
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
