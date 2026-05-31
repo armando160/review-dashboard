@@ -28,7 +28,7 @@ export const BRAND_COLORS: Record<string, string> = {
   Oaktiv: '#495D6E',
   Petcove: '#F1D077',
   Joyberri: '#A278B5',
-  'Loft&Ivy': '#F1ECE6',
+  'Loft&Ivy': '#D4845A',
   Sunello: '#1B6CC8',
   Culvani: '#303B43',
 }

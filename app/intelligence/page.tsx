@@ -105,7 +105,7 @@ function ProductCard({ s, onClick }: { s: ProductSnapshot; onClick: () => void }
   return (
     <button
       onClick={onClick}
-      className={`text-left w-full border-l-[3px] ${border} rounded-lg bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-150 p-4 flex flex-col gap-2.5 focus:outline-none focus:ring-2 focus:ring-primary/40`}
+      className={`text-left w-full border-2 ${border} rounded-lg bg-card shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-150 p-4 flex flex-col gap-2.5 focus:outline-none focus:ring-2 focus:ring-primary/40`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
@@ -773,7 +773,7 @@ export default function IntelligencePage() {
         {/* Legend */}
         {!loading && filtered.length > 0 && (
           <div className="flex flex-wrap gap-4 pt-3 border-t border-border text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">Card left border:</span>
+            <span className="font-medium text-foreground">Card border:</span>
             {[
               { label: '≥ 30% negative', cls: 'border-red-500' },
               { label: '18–29% negative', cls: 'border-yellow-500' },
@@ -781,7 +781,7 @@ export default function IntelligencePage() {
               { label: 'Not classified', cls: 'border-border' },
             ].map(({ label, cls }) => (
               <span key={label} className="flex items-center gap-1.5">
-                <span className={`w-3 h-4 border-l-4 ${cls} rounded-sm`} />
+                <span className={`w-4 h-4 border-2 ${cls} rounded-sm`} />
                 {label}
               </span>
             ))}

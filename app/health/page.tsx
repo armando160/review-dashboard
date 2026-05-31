@@ -36,7 +36,9 @@ function timeAgo(iso: string | null) {
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '—'
-  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
   })
 }
@@ -220,7 +222,7 @@ export default function DataHealthPage() {
               <StatCard
                 label="Last Pipeline Run"
                 value={timeAgo(stats.pipeline.last_run_at)}
-                sub={stats.pipeline.last_run_at ? formatDate(stats.pipeline.last_run_at.split('T')[0]) : '—'}
+                sub={formatDate(stats.pipeline.last_run_at)}
                 icon={Clock}
               />
             </div>
