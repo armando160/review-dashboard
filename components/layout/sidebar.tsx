@@ -56,6 +56,19 @@ export function Sidebar() {
           </Link>
         ))}
       </nav>
+      <div className="px-4 py-3 border-t border-border">
+        <p className="text-[10px] text-muted-foreground/60 leading-snug">
+          Review data sourced from{' '}
+          <a
+            href="https://www.woot.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-muted-foreground transition-colors"
+          >
+            Woot.com
+          </a>
+        </p>
+      </div>
     </aside>
   )
 }
