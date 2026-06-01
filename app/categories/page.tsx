@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { Header } from '@/components/layout/header'
 import { CategoryBreakdown } from '@/components/charts/category-breakdown'
-import { SentimentTrend } from '@/components/charts/sentiment-trend'
 import { Heatmap } from '@/components/charts/heatmap'
 import { useFilters } from '@/hooks/use-filters'
 import { fetchCategorySentiment, fetchHeatmap } from '@/lib/queries'
@@ -31,7 +30,6 @@ export default function CategoryIntelligence() {
       <Header title="Category Intelligence" description="Sentiment breakdown by review category" />
       <div className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
         <CategoryBreakdown data={catSentiment} loading={loading} />
-        <SentimentTrend data={catSentiment} periodData={[]} loading={loading} />
         <Heatmap data={heatmap} loading={loading} />
       </div>
     </div>

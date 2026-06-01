@@ -193,6 +193,9 @@ export default function DataHealthPage() {
         {/* ── Quick stats ──────────────────────────────────────────────────── */}
         <section className="space-y-3">
           <SectionTitle>Overview</SectionTitle>
+          <p className="text-xs text-muted-foreground -mt-2">
+            All-time totals — not filtered by the date selector
+          </p>
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[...Array(4)].map((_, i) => <Skeleton key={i} />)}

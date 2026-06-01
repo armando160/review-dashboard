@@ -5,7 +5,7 @@ import { subDays } from 'date-fns'
 import type { Filters, Granularity, ReviewCategory, Sentiment } from '@/types'
 
 const defaultFilters: Filters = {
-  dateFrom: subDays(new Date(), 30),
+  dateFrom: subDays(new Date(), 90),
   dateTo: new Date(),
   brands: [],
   asins: [],
