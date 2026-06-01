@@ -12,6 +12,7 @@ import {
   Clock,
   AlertTriangle,
   RefreshCw,
+  AlertCircle,
 } from 'lucide-react'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -145,6 +146,11 @@ export default function DataHealthPage() {
     ? pct(stats.pipeline.total_found - stats.pipeline.total_new, stats.pipeline.total_found)
     : 0
 
+  // Stale pipeline warning — flag if last run was > 8 hours ago
+  const pipelineStaleHours = stats?.pipeline?.last_run
+    ? Math.floor((Date.now() - new Date(stats.pipeline.last_run).getTime()) / 3_600_000)
+    : null
+
   // Estimate days to clear classification backlog at 2,000/day
   const daysToClassify = stats
     ? stats.reviews.unclassified === 0
@@ -187,6 +193,35 @@ export default function DataHealthPage() {
             <strong>Failed to load stats:</strong> {error}
             <br />
             <span className="text-xs">Make sure the <code>data_health_stats</code> SQL function has been created in Supabase.</span>
+          </div>
+        )}
+
+        {/* ── Stale pipeline warning ────────────────────────────────────────── */}
+        {!loading && pipelineStaleHours !== null && pipelineStaleHours >= 8 && (
+          <div className={`flex items-start gap-3 p-4 rounded-lg border text-sm ${
+            pipelineStaleHours >= 14
+              ? 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
+              : 'bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-300'
+          }`}>
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            <div>
+              <strong>Pipeline overdue — last run was {pipelineStaleHours}h ago.</strong>
+              {' '}Scheduled runs fire at 12 AM, 6 AM, 12 PM, and 6 PM Eastern.
+              {pipelineStaleHours >= 14 && (
+                <span> At least one scheduled run appears to have been skipped.</span>
+              )}
+              <div className="mt-1 text-xs opacity-80">
+                To trigger manually: go to{' '}
+                <a
+                  href="https://github.com/armando160/review-dashboard-scraper/actions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-medium"
+                >
+                  GitHub Actions → Review Dashboard Scraper → Run workflow
+                </a>
+              </div>
+            </div>
           </div>
         )}
 
