@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { ALL_BRANDS } from './utils'
 import type {
   Filters,
   VelocityDataPoint,
@@ -140,10 +141,11 @@ async function fetchVelocityDirect(filters: Filters): Promise<VelocityDataPoint[
 export async function fetchRatingEvolution(
   filters: Filters
 ): Promise<Array<{ period: string; [brand: string]: string | number }>> {
-  const points = await fetchVelocityDirect(filters)
+  const points = await fetchVelocity(filters)
 
   const periodMap = new Map<string, Record<string, { sum: number; count: number }>>()
   for (const p of points) {
+    if (typeof p.brand !== 'string' || !ALL_BRANDS.includes(p.brand)) continue
     if (!periodMap.has(p.period)) periodMap.set(p.period, {})
     const brandMap = periodMap.get(p.period)!
     if (!brandMap[p.brand]) brandMap[p.brand] = { sum: 0, count: 0 }
