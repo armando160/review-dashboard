@@ -147,8 +147,8 @@ export default function DataHealthPage() {
     : 0
 
   // Stale pipeline warning — flag if last run was > 8 hours ago
-  const pipelineStaleHours = stats?.pipeline?.last_run
-    ? Math.floor((Date.now() - new Date(stats.pipeline.last_run).getTime()) / 3_600_000)
+  const pipelineStaleHours = stats?.pipeline?.last_run_at
+    ? Math.floor((Date.now() - new Date(stats.pipeline.last_run_at).getTime()) / 3_600_000)
     : null
 
   // Estimate days to clear classification backlog at 2,000/day
